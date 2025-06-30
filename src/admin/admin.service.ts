@@ -161,85 +161,6 @@ export class AdminService {
     }
   }
 
-  async getProfile(req: Request) {
-    try {
-      const authHeader = req.headers.authorization;
-      if (!authHeader) {
-        throw new UnauthorizedException("Authorization header topilmadi");
-      }
-
-      const token = authHeader.split(" ")[1];
-      if (!token) {
-        throw new UnauthorizedException("Token topilmadi");
-      }
-
-      const payload = await this.jwtService.verifyAsync(token, {
-        secret:
-          process.env.ADMIN_ACCESS_TOKEN_KEY || process.env.ACCESS_TOKEN_KEY,
-      });
-
-      const adminProfile = await this.findOne(payload.id);
-
-      const { password, refresh_token, ...profile } = adminProfile.toJSON();
-
-      return { message: "Admin profile ma'lumotlari", profile };
-    } catch (error) {
-      throw new UnauthorizedException("Profile ma'lumotlarini olishda xatolik");
-    }
-  }
-
-  async updateProfile(req: Request, updateAdminDto: UpdateAdminDto) {
-    try {
-      const authHeader = req.headers.authorization;
-      if (!authHeader) {
-        throw new UnauthorizedException("Authorization header topilmadi");
-      }
-
-      const token = authHeader.split(" ")[1];
-      if (!token) {
-        throw new UnauthorizedException("Token topilmadi");
-      }
-
-      const payload = await this.jwtService.verifyAsync(token, {
-        secret:
-          process.env.ADMIN_ACCESS_TOKEN_KEY || process.env.ACCESS_TOKEN_KEY,
-      });
-
-      const updatedAdmin = await this.update(payload.id, updateAdminDto);
-
-      const { password, refresh_token, ...profile } = updatedAdmin.toJSON();
-
-      return { message: "Admin profile yangilandi", profile };
-    } catch (error) {
-      throw new UnauthorizedException("Profile yangilashda xatolik");
-    }
-  }
-
-  async deleteProfile(req: Request) {
-    try {
-      const authHeader = req.headers.authorization;
-      if (!authHeader) {
-        throw new UnauthorizedException("Authorization header topilmadi");
-      }
-
-      const token = authHeader.split(" ")[1];
-      if (!token) {
-        throw new UnauthorizedException("Token topilmadi");
-      }
-
-      const payload = await this.jwtService.verifyAsync(token, {
-        secret:
-          process.env.ADMIN_ACCESS_TOKEN_KEY || process.env.ACCESS_TOKEN_KEY,
-      });
-
-      await this.remove(payload.id);
-
-      return { message: "Admin profile o'chirildi" };
-    } catch (error) {
-      throw new UnauthorizedException("Profile o'chirishda xatolik");
-    }
-  }
-
   async getAllUsers() {
     try {
       const users = await this.userModel.findAll();
@@ -295,14 +216,7 @@ export class AdminService {
 
   async deleteUser(id: number) {
     try {
-      const user = await this.userModel.findByPk(id);
-
-      if (!user) {
-        throw new UnauthorizedException("Foydalanuvchi topilmadi");
-      }
-
-      await user.destroy();
-
+      await this.userModel.destroy({ where: { id } });
       return { message: "Foydalanuvchi o'chirildi" };
     } catch (error) {
       throw new UnauthorizedException("Foydalanuvchi o'chirishda xatolik");
@@ -358,79 +272,11 @@ export class AdminService {
     }
   }
 
-  async getStats() {
-    try {
-      const [usersCount, adminsCount] = await Promise.all([
-        this.userModel.count(),
-        this.adminModel.count(),
-      ]);
-
-      return {
-        message: "Statistika ma'lumotlari",
-        stats: {
-          total_users: usersCount,
-          total_admins: adminsCount,
-          total_accounts: usersCount + adminsCount,
-        },
-      };
-    } catch (error) {
-      throw new UnauthorizedException("Statistika olishda xatolik");
-    }
-  }
-
-  async getUserStats() {
-    try {
-      const [totalUsers, activeUsers, premiumUsers] = await Promise.all([
-        this.userModel.count(),
-        this.userModel.count({ where: { is_active: true } }),
-        this.userModel.count({ where: { is_premium: true } }),
-      ]);
-
-      return {
-        message: "Foydalanuvchilar statistikasi",
-        stats: {
-          total_users: totalUsers,
-          active_users: activeUsers,
-          premium_users: premiumUsers,
-          inactive_users: totalUsers - activeUsers,
-        },
-      };
-    } catch (error) {
-      throw new UnauthorizedException(
-        "Foydalanuvchilar statistikasini olishda xatolik"
-      );
-    }
-  }
-
-  async getAdminStats() {
-    try {
-      const [totalAdmins, activeAdmins, superAdmins] = await Promise.all([
-        this.adminModel.count(),
-        this.adminModel.count({ where: { is_active: true } }),
-        this.adminModel.count({ where: { role: "super_admin" } }),
-      ]);
-
-      return {
-        message: "Adminlar statistikasi",
-        stats: {
-          total_admins: totalAdmins,
-          active_admins: activeAdmins,
-          super_admins: superAdmins,
-          inactive_admins: totalAdmins - activeAdmins,
-        },
-      };
-    } catch (error) {
-      throw new UnauthorizedException(
-        "Adminlar statistikasini olishda xatolik"
-      );
-    }
-  }
-
   async findOne(id: number) {
-    const admin = await this.adminModel.findByPk(id);
+    const admin = await this.adminModel.findOne({ where: { id } });
 
     if (!admin) {
-      throw new UnauthorizedException(`Admin with ID ${id} not found`);
+      throw new UnauthorizedException(`Admin topilmadi`);
     }
 
     return admin;
@@ -455,6 +301,5 @@ export class AdminService {
   async remove(id: number) {
     const admin = await this.findOne(id);
     await admin.destroy();
-    return { message: "Admin o'chirildi" };
   }
 }

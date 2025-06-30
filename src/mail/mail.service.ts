@@ -7,7 +7,7 @@ export class MailService {
   constructor(private readonly mailerService: MailerService) {}
 
   async sendMail(user: User) {
-    const url = `${process.env.api_url}/api/users/activate/${user.activation_link}`;
+    const url = `${process.env.api_url}/api/auth/activate/${user.activation_link}`;
     console.log(url);
 
     await this.mailerService.sendMail({

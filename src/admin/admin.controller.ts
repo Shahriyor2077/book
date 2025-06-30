@@ -46,21 +46,6 @@ export class AdminController {
     return this.adminService.refresh(req, res);
   }
 
-  @Get("profile")
-  getProfile(@Req() req: Request) {
-    return this.adminService.getProfile(req);
-  }
-
-  @Put("profile")
-  updateProfile(@Req() req: Request, @Body() updateAdminDto: UpdateAdminDto) {
-    return this.adminService.updateProfile(req, updateAdminDto);
-  }
-
-  @Delete("profile")
-  deleteProfile(@Req() req: Request) {
-    return this.adminService.deleteProfile(req);
-  }
-
   @Get("users")
   getAllUsers() {
     return this.adminService.getAllUsers();
@@ -99,20 +84,5 @@ export class AdminController {
   @Delete("admins/:id")
   deleteAdmin(@Param("id") id: string) {
     return this.adminService.deleteAdmin(+id);
-  }
-
-  @Get("stats")
-  getStats() {
-    return this.adminService.getStats();
-  }
-
-  @Get("stats/users")
-  getUserStats() {
-    return this.adminService.getUserStats();
-  }
-
-  @Get("stats/admins")
-  getAdminStats() {
-    return this.adminService.getAdminStats();
   }
 }

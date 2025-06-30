@@ -2,6 +2,7 @@ import {
   BadRequestException,
   Injectable,
   NotFoundException,
+  UnauthorizedException,
 } from "@nestjs/common";
 import { CreateUserDto } from "./dto/create-user.dto";
 import { UpdateUserDto } from "./dto/update-user.dto";
@@ -66,4 +67,37 @@ export class UsersService {
   remove(id: number) {
     return this.userModel.destroy({ where: { id } });
   }
+
+  async updateRefreshToken(id: number, refresh_token: string) {
+    const updatedUser = await this.userModel.update(
+      { refresh_token },
+      { where: { id } }
+    );
+    return updatedUser;
+  };
+
+  async activateUser(link: string){
+    if(!link){
+      throw new BadRequestException("Activation link not found")
+    }
+
+    const updateUser=await this.userModel.update(
+      {is_active: true},
+      {
+        where: {activation_link: link, 
+          is_active: false
+        },
+        returning: true
+      }
+    )
+    if(!updateUser[1][0]){
+      throw new BadRequestException("User already activate")
+    }
+    return {
+      message: "User activated successfully",
+      is_active: updateUser[1][0].is_active
+    };
+  }
+
+
 }

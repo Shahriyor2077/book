@@ -7,11 +7,13 @@ import {
   Req,
   Get,
   Param,
+  ParseIntPipe,
 } from "@nestjs/common";
 import { AuthService } from "./auth.service";
 import { CreateUserDto } from "../users/dto/create-user.dto";
 import { SigninUserDto } from "../users/dto/signin-user.dto";
 import { Response, Request } from "express";
+import { CookieGetter } from "src/common/decorators/cookie-getter.decorators";
 
 @Controller("auth")
 export class AuthController {
@@ -33,19 +35,27 @@ export class AuthController {
 
   @HttpCode(200)
   @Post("signout")
-  signout(@Req() req: Request, @Res({ passthrough: true }) res: Response) {
-    return this.authService.signout(req, res);
+  signout(
+    @CookieGetter("refreshToken") refreshToken: string,
+    @Res({passthrough: true}) res:Response
+  ){
+    return this.authService.signout(refreshToken, res)
   }
 
-  @HttpCode(200)
-  @Get("refresh")
-  refresh(@Req() req: Request, @Res({ passthrough: true }) res: Response) {
-    return this.authService.refresh(req, res);
-  }
 
   @HttpCode(200)
-  @Get("activate/:link")
-  activate(@Param("link") link: string) {
-    return this.authService.activate(link);
+  @Post(":id/refresh")
+  refresh(
+    @Param("id", ParseIntPipe) id: number,
+    @CookieGetter("refreshToken") refreshToken: string,
+    @Res({ passthrough: true }) res: Response
+  ) {
+    return this.authService.refresh(id, refreshToken, res);
   }
+
+  // @HttpCode(200)
+  // @Get("activate/:link")
+  // activate(@Param("link") link: string) {
+  //   return this.authService.activate(link);
+  // }
 }
