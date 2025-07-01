@@ -9,24 +9,32 @@ import { AdminModule } from "./admin/admin.module";
 import { Admin } from "./admin/models/admin.model";
 import { TelegrafModule } from "nestjs-telegraf";
 import { BOT_NAME } from "./app.constants";
-import { BotModule } from './bot/bot.module';
-import { GenreModule } from './genre/genre.module';
+import { BotModule } from "./bot/bot.module";
+import { GenreModule } from "./genre/genre.module";
 import { Genre } from "./genre/models/genre.model";
-import { LanguagesModule } from './languages/languages.module';
-import { AuthorsModule } from './authors/authors.module';
-import { CategoriesModule } from './categories/categories.module';
+import { LanguagesModule } from "./languages/languages.module";
+import { AuthorsModule } from "./authors/authors.module";
+import { CategoriesModule } from "./categories/categories.module";
 import { Author } from "./authors/models/author.model";
 import { Language } from "./languages/models/language.model";
 import { Categories } from "./categories/models/category.model";
+import { AudioBookModule } from "./audio-book/audio-book.module";
+import { AudioBook } from "./audio-book/models/audio-book.model";
+import { AudioPartsModule } from "./audio-parts/audio-parts.module";
+import { AudioPart } from "./audio-parts/models/audio-part.model";
+import { Book } from "./books/models/book.model";
+import { BookVersion } from "./book-version/models/book-version.model";
+import { BooksModule } from "./books/books.module";
+import { BookVersionModule } from "./book-version/book-version.module";
 
 @Module({
   imports: [
     TelegrafModule.forRootAsync({
       botName: BOT_NAME,
-      useFactory:()=>({
+      useFactory: () => ({
         token: process.env.BOT_TOKEN!,
         middlewares: [],
-        include: [BotModule]
+        include: [BotModule],
       }),
     }),
     ConfigModule.forRoot({
@@ -41,10 +49,21 @@ import { Categories } from "./categories/models/category.model";
       username: process.env.PG_USER,
       password: process.env.PG_PASSWORD,
       database: process.env.PG_DB,
-      models: [User, Admin, Genre, Author, Language, Categories],
+      models: [
+        User,
+        Admin,
+        Genre,
+        Author,
+        Language,
+        Categories,
+        AudioBook,
+        AudioPart,
+        Book,
+        BookVersion
+      ],
       autoLoadModels: true,
       logging: false,
-      sync: { alter: true },  
+      sync: { alter: true },
     }),
 
     UsersModule,
@@ -64,6 +83,14 @@ import { Categories } from "./categories/models/category.model";
     AuthorsModule,
 
     CategoriesModule,
+
+    AudioBookModule,
+
+    AudioPartsModule,
+
+    BooksModule,
+
+    BookVersionModule
   ],
   controllers: [],
   providers: [],
