@@ -47,7 +47,7 @@ export class Admin extends Model<Admin, IAdminCreationAttr> {
 
   @Column({
     type: DataType.BOOLEAN,
-    defaultValue: true,
+    defaultValue: false,
   })
   declare is_active: boolean;
 
@@ -56,4 +56,10 @@ export class Admin extends Model<Admin, IAdminCreationAttr> {
     allowNull: true,
   })
   declare refresh_token: string;
+
+  @Column({
+    type: DataType.UUID,
+    defaultValue: DataType.UUIDV4,
+  })
+  declare activation_link: string;
 }

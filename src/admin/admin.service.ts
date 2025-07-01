@@ -12,13 +12,15 @@ import { Response, Request } from "express";
 import * as bcrypt from "bcrypt";
 import { InjectModel } from "@nestjs/sequelize";
 import { User } from "../users/models/user.model";
+import { MailService } from "../mail/mail.service";
 
 @Injectable()
 export class AdminService {
   constructor(
     @InjectModel(Admin) private readonly adminModel: typeof Admin,
     @InjectModel(User) private readonly userModel: typeof User,
-    private readonly jwtService: JwtService
+    private readonly jwtService: JwtService,
+    private readonly mailService: MailService
   ) {}
 
   async generateTokens(admin: Admin) {
@@ -30,10 +32,8 @@ export class AdminService {
 
     const [accessToken, refreshToken] = await Promise.all([
       this.jwtService.signAsync(payload, {
-        secret:
-          process.env.ADMIN_ACCESS_TOKEN_KEY || process.env.ACCESS_TOKEN_KEY,
-        expiresIn:
-          process.env.ADMIN_ACCESS_TOKEN_TIME || process.env.ACCESS_TOKEN_TIME,
+        secret: process.env.ADMIN_ACCESS_TOKEN_KEY,
+        expiresIn: process.env.ADMIN_ACCESS_TOKEN_TIME,
       }),
       this.jwtService.signAsync(payload, {
         secret:
@@ -54,28 +54,48 @@ export class AdminService {
     if (candidate) {
       throw new ConflictException("Bunday admin mavjud");
     }
-
     const { password, confirm_password } = createAdminDto;
     if (password !== confirm_password) {
       throw new ConflictException("Parollar mos emas");
     }
-
     const hashed_password = await bcrypt.hash(password, 7);
-
     const newAdmin = await this.adminModel.create({
       ...createAdminDto,
       password: hashed_password,
     });
-
+    newAdmin.is_active = false;
+    await newAdmin.save();
+    try {
+      await this.mailService.sendMail(
+        {
+          email: newAdmin.email,
+          full_name: newAdmin.full_name,
+          activation_link: newAdmin.activation_link,
+        },
+        "admin"
+      );
+    } catch (error) {
+      // Email yuborishda xatolik
+    }
     return {
-      message: "Admin muvaffaqiyatli yaratildi",
-      admin: {
-        id: newAdmin.id,
-        full_name: newAdmin.full_name,
-        email: newAdmin.email,
-        role: newAdmin.role,
-      },
+      message: "Admin ro'yxatdan o'tdi. Emailni tasdiqlang!",
+      email: newAdmin.email,
     };
+  }
+
+  async activateAdmin(link: string) {
+    const admin = await this.adminModel.findOne({
+      where: { activation_link: link },
+    });
+    if (!admin) {
+      throw new UnauthorizedException("Noto'g'ri activation link");
+    }
+    if (admin.is_active) {
+      return { message: "Admin allaqachon faollashtirilgan" };
+    }
+    admin.is_active = true;
+    await admin.save();
+    return { message: "Admin muvaffaqiyatli faollashtirildi" };
   }
 
   async signin(signinAdminDto: SigninAdminDto, res: Response) {
