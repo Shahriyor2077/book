@@ -26,13 +26,6 @@ export class BookVersion extends Model<BookVersion, IBookVersionCreationAttr> {
   })
   declare id: number;
 
-  @ForeignKey(() => Book)
-  @Column({
-    type: DataType.INTEGER,
-    allowNull: false,
-  })
-  book_id: number;
-
   @Column({
     type: DataType.INTEGER,
     allowNull: false,
@@ -62,6 +55,12 @@ export class BookVersion extends Model<BookVersion, IBookVersionCreationAttr> {
     allowNull: false,
   })
   cover_url: string;
+
+  @ForeignKey(() => Book)
+  @Column({
+    type: DataType.INTEGER,
+  })
+  book_id: number;
 
   @BelongsTo(() => Book)
   book: Book;

@@ -11,8 +11,9 @@ import { AuthorsService } from "./authors.service";
 import { CreateAuthorDto } from "./dto/create-author.dto";
 import { UpdateAuthorDto } from "./dto/update-author.dto";
 import { Author } from "./models/author.model";
-import { ApiOperation, ApiResponse } from "@nestjs/swagger";
+import { ApiOperation, ApiResponse, ApiTags } from "@nestjs/swagger";
 
+@ApiTags("authors")
 @Controller("authors")
 export class AuthorsController {
   constructor(private readonly authorsService: AuthorsService) {}

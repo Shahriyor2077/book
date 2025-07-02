@@ -1,4 +1,5 @@
-import { Column, DataType, Model, Table } from "sequelize-typescript";
+import { Column, DataType, HasMany, Model, Table } from "sequelize-typescript";
+import { Subscription } from "../../subscription/models/subscription.model";
 
 export interface IUserCreationAttr {
   full_name: string;
@@ -73,4 +74,7 @@ export class User extends Model<User, IUserCreationAttr> {
     allowNull: true,
   })
   declare refresh_token: string;
+
+  @HasMany(() => Subscription)
+  subscription: Subscription[]
 }

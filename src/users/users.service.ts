@@ -9,10 +9,21 @@ import { UpdateUserDto } from "./dto/update-user.dto";
 import { InjectModel } from "@nestjs/sequelize";
 import { User } from "./models/user.model";
 import * as bcrypt from "bcrypt";
+import { PhoneUserDto } from "./dto/phone-user.dto";
+import * as otpGenerator from "otp-generator"
+import { BotService } from "src/bot/bot.service";
+import { Otp } from "./models/otp.model";
+import { AddMinutesToDate } from "src/common/helpers/addMinutes";
+import { timestamp } from "rxjs";
+import { encode } from "src/common/helpers/crypto";
 
 @Injectable()
 export class UsersService {
-  constructor(@InjectModel(User) private readonly userModel: typeof User) {}
+  constructor(
+    @InjectModel(User) private readonly userModel: typeof User,
+    @InjectModel(Otp) private readonly otpModel: typeof Otp,
+  private readonly botService: BotService
+) {}
   async create(createUserDto: CreateUserDto) {
     const { password, confirm_password } = createUserDto;
     if (password !== confirm_password) {
@@ -99,5 +110,35 @@ export class UsersService {
     };
   }
 
+  async newOtp(phoneUserDto: PhoneUserDto){
+    const phone_number=phoneUserDto.phone
+    const otp=otpGenerator.generate(4, {
+      upperCaseAlphabets: false,
+      lowerCaseAlphabets: false,
+      specialChars: false,
+    });
+    const isSend=await this.botService.sendOtp(phone_number, otp)
+    if(!isSend){
+      throw new BadRequestException("Avval botdan ro'yxatdan o'ting")
+    }
+
+    const now=new Date()
+    const expiration_time=AddMinutesToDate(now, 5);
+    await this.otpModel.destroy({where: {phone_number}});
+    const dbOtp=await this.otpModel.create({
+      otp, expiration_time, phone_number
+    });
+    const details={
+      timestamp: now,
+      phone_number,
+      otp_id: dbOtp.id,
+    };
+    const encodedData=await encode(JSON.stringify(details))
+
+    return {
+      message: "Otp botga yuborildi",
+      verification_code: encodedData
+    }
+  }
 
 }

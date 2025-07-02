@@ -10,9 +10,10 @@ import {
 import { AudioPartsService } from "./audio-parts.service";
 import { CreateAudioPartDto } from "./dto/create-audio-part.dto";
 import { UpdateAudioPartDto } from "./dto/update-audio-part.dto";
-import { ApiOperation, ApiResponse } from "@nestjs/swagger";
+import { ApiOperation, ApiResponse, ApiTags } from "@nestjs/swagger";
 import { AudioPart } from "./models/audio-part.model";
 
+@ApiTags("Audio part")
 @Controller("audio-parts")
 export class AudioPartsController {
   constructor(private readonly audioPartsService: AudioPartsService) {}

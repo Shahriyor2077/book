@@ -15,6 +15,7 @@ import { UpdateUserDto } from "./dto/update-user.dto";
 import { UserGuard } from "src/common/guards/user.guard";
 import { SelfGuard } from "src/common/guards/user.self.guard";
 import { PremiumGuard } from "../common/guards/user.premium.guard";
+import { PhoneUserDto } from "./dto/phone-user.dto";
 
 @Controller("users")
 export class UsersController {
@@ -23,6 +24,12 @@ export class UsersController {
   @Post()
   create(@Body() createUserDto: CreateUserDto) {
     return this.usersService.create(createUserDto);
+  }
+
+  @HttpCode(200)
+  @Post("new-otp")
+  newOtp(@Body() phoneUserDto: PhoneUserDto) {
+    return this.usersService.newOtp(phoneUserDto);
   }
 
   @UseGuards(UserGuard)
@@ -48,9 +55,7 @@ export class UsersController {
   }
 
   @Get("activate/:link")
-  activateUser(@Param("link") link: string){
+  activateUser(@Param("link") link: string) {
     return this.usersService.activateUser(link);
   }
-
-
 }

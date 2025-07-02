@@ -26,6 +26,18 @@ import { Book } from "./books/models/book.model";
 import { BookVersion } from "./book-version/models/book-version.model";
 import { BooksModule } from "./books/books.module";
 import { BookVersionModule } from "./book-version/book-version.module";
+import { Bot } from "./bot/models/bot.model";
+
+import { Otp } from "./users/models/otp.model";
+import { CollectionModule } from './collection/collection.module';
+import { BookCollectionModule } from './book-collection/book-collection.module';
+import { BookMarksModule } from './book-marks/book-marks.module';
+import { SubscriptionModule } from './subscription/subscription.module';
+import { BookCollection } from "./book-collection/models/book-collection.model";
+import { Collection } from "./collection/models/collection.model";
+import { BookMark } from "./book-marks/models/book-mark.model";
+import { Subscription } from "./subscription/models/subscription.model";
+import { NotificationModule } from './notification/notification.module';
 
 @Module({
   imports: [
@@ -59,7 +71,13 @@ import { BookVersionModule } from "./book-version/book-version.module";
         AudioBook,
         AudioPart,
         Book,
-        BookVersion
+        BookVersion,
+        Bot,
+        Otp,
+        BookCollection,
+        Collection,
+        BookMark,
+        Subscription
       ],
       autoLoadModels: true,
       logging: false,
@@ -90,7 +108,20 @@ import { BookVersionModule } from "./book-version/book-version.module";
 
     BooksModule,
 
-    BookVersionModule
+    BookVersionModule,
+
+    BotModule,
+
+    CollectionModule,
+
+    BookCollectionModule,
+
+    BookMarksModule,
+
+    SubscriptionModule,
+
+    NotificationModule,
+
   ],
   controllers: [],
   providers: [],

@@ -1,5 +1,7 @@
 import { Column, DataType, Model, Table, HasMany } from "sequelize-typescript";
 import { BookVersion } from "../../book-version/models/book-version.model";
+import { BookCollection } from "src/book-collection/models/book-collection.model";
+import { BookMark } from "../../book-marks/models/book-mark.model";
 
 export interface IBookCreationAttr {
   publisher_year: string;
@@ -29,4 +31,10 @@ export class Book extends Model<Book, IBookCreationAttr> {
 
   @HasMany(() => BookVersion)
   bookVersions: BookVersion[];
+
+  @HasMany(()=>BookCollection)
+  bookCollection: BookCollection[]
+
+  @HasMany(()=>BookMark)
+  bookMarks: BookMark[]
 }
